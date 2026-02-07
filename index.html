@@ -1,1 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>For You 💌</title>
+  <style>
+    body{
+      margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: radial-gradient(circle at top, #ffd1dc, #fff 55%, #ffe6f0);
+      color:#1b1b1b;
+    }
+    .card{
+      width:min(720px, 92vw);
+      background: rgba(255,255,255,0.8);
+      border: 1px solid rgba(255,105,180,0.25);
+      box-shadow: 0 20px 60px rgba(255,105,180,0.18);
+      border-radius: 24px;
+      padding: 28px;
+      position: relative;
+      overflow:hidden;
+    }
+    h1{ margin:0 0 6px; font-size: clamp(28px, 4vw, 44px); }
+    p{ line-height:1.55; font-size: 18px; margin: 10px 0; }
+    .row{ display:flex; gap:12px; flex-wrap:wrap; margin-top: 16px; }
+    button{
+      border:0; border-radius: 999px; padding: 12px 16px;
+      font-size: 16px; cursor:pointer;
+      background:#ff4d88; color:white;
+      box-shadow: 0 10px 24px rgba(255,77,136,0.25);
+    }
+    button.secondary{ background:#fff; color:#ff2e74; border:1px solid rgba(255,46,116,0.25); }
+    .hidden{ display:none; }
+    .hearts span{
+      position:absolute; bottom:-30px; font-size: 18px; opacity:0.9;
+      animation: floatUp linear infinite;
+    }
+    @keyframes floatUp{
+      from{ transform: translateY(0) translateX(0) rotate(0deg); opacity: 0.0;}
+      10%{ opacity: 0.9; }
+      to{ transform: translateY(-120vh) translateX(40px) rotate(18deg); opacity: 0;}
+    }
+    .footer{ margin-top: 18px; font-size: 14px; opacity:0.7;}
+    .badge{
+      display:inline-block; padding:6px 10px; border-radius:999px;
+      background: rgba(255,77,136,0.12); border:1px solid rgba(255,77,136,0.22);
+      font-size: 13px; margin-bottom: 10px;
+    }
+    input{
+      width:min(380px, 100%); padding: 12px 14px; border-radius: 12px;
+      border: 1px solid rgba(0,0,0,0.12); font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge">💘 Valentine’s Delivery</div>
+    <h1 id="title">Hey you 😌</h1>
+    <p id="subtitle">I made you a tiny website because you’re literally my favorite person.</p>
+
+    <div class="row">
+      <input id="name" placeholder="Type your name here..." />
+      <button onclick="start()">Open 💌</button>
+      <button class="secondary" onclick="surprise()">Surprise</button>
+    </div>
+
+    <div id="content" class="hidden">
+      <p id="msg"></p>
+      <p><b>Choose your Valentine reward:</b></p>
+      <div class="row">
+        <button onclick="pick('A date night of your choice 🍣')">Date Night 🍣</button>
+        <button onclick="pick('One giant hoodie steal pass 🧥')">Hoodie Pass 🧥</button>
+        <button onclick="pick('A 24-hour “yes day” (within reason 😭)')">Yes Day ✅</button>
+      </div>
+      <p id="choice" class="hidden"></p>
+      <p class="footer">Made with embarrassing amounts of love 💗</p>
+    </div>
+
+    <div class="hearts" id="hearts"></div>
+  </div>
+
+  <script>
+    // floating hearts
+    const hearts = document.getElementById("hearts");
+    const emojis = ["💗","💖","💘","💝","💕","❤️"];
+    for(let i=0;i<18;i++){
+      const s=document.createElement("span");
+      s.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+      s.style.left = Math.random()*100 + "%";
+      s.style.animationDuration = (6 + Math.random()*6) + "s";
+      s.style.animationDelay = (Math.random()*4) + "s";
+      s.style.fontSize = (14 + Math.random()*18) + "px";
+      hearts.appendChild(s);
+    }
+
+    function start(){
+      const n = document.getElementById("name").value.trim() || "my love";
+      document.getElementById("title").textContent = `Hey ${n} 💞`;
+      document.getElementById("subtitle").textContent = "Okay… I have something to tell you.";
+      document.getElementById("content").classList.remove("hidden");
+      document.getElementById("msg").textContent =
+        `I’m grateful for you. You make my days better, my brain calmer, and my life way more fun. Happy Valentine’s Day 💌`;
+    }
+
+    function pick(text){
+      const el = document.getElementById("choice");
+      el.classList.remove("hidden");
+      el.textContent = `Locked in: ${text} — redeem whenever 😌`;
+    }
+
+    function surprise(){
+      alert("You are loved. Like, a lot. 💘");
+    }
+  </script>
+</body>
+</html>
 
