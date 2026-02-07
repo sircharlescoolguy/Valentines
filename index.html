@@ -4,24 +4,23 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Valentine?</title>
+
   <style>
     :root{
       --pink:#ff4d88;
       --pink2:#ff2e74;
       --bg1:#ffd1dc;
       --bg2:#fff;
-      --card: rgba(255,255,255,0.88);
+      --card: rgba(255,255,255,0.90);
       --shadow: rgba(255,77,136,0.18);
       --text:#171717;
     }
 
     *{ box-sizing:border-box; }
+
     body{
       margin:0;
       min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
       background: radial-gradient(circle at top, var(--bg1), var(--bg2) 55%, #ffe6f0);
       color: var(--text);
@@ -29,16 +28,61 @@
       padding: 18px;
     }
 
-    .wrap{ width:min(740px, 94vw); position:relative; }
+    /* Center container */
+    .wrap{
+      min-height: calc(100vh - 36px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
 
-    .card{
+    /* HEART-SHAPED CARD */
+    .heartCard{
+      position: relative;
+      width: min(520px, 92vw);
+      aspect-ratio: 1 / 1;              /* keeps heart nice on phones */
+      filter: drop-shadow(0 20px 60px var(--shadow));
+    }
+
+    /* heart body */
+    .heartCard::before,
+    .heartCard::after{
+      content:"";
+      position:absolute;
+      width: 50%;
+      height: 80%;
+      top: 10%;
       background: var(--card);
       border: 1px solid rgba(255,105,180,0.25);
-      box-shadow: 0 20px 60px var(--shadow);
-      border-radius: 24px;
+      border-bottom: none;
+      border-radius: 999px 999px 20px 20px;
+    }
+    .heartCard::before{
+      left: 25%;
+      transform: rotate(-45deg);
+      transform-origin: 0% 100%;
+    }
+    .heartCard::after{
+      left: 25%;
+      transform: rotate(45deg);
+      transform-origin: 100% 100%;
+    }
+
+    /* content layer sitting on top of heart */
+    .content{
+      position:absolute;
+      inset: 0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
       padding: clamp(18px, 3vw, 28px);
-      position:relative;
-      overflow:hidden;
+      text-align:center;
+      pointer-events: auto;
+    }
+
+    .inner{
+      width: 88%;
+      max-width: 420px;
     }
 
     .badge{
@@ -52,8 +96,8 @@
     }
 
     h1{
-      margin: 0 0 6px;
-      font-size: clamp(26px, 4vw, 42px);
+      margin: 0 0 8px;
+      font-size: clamp(26px, 5vw, 42px);
       letter-spacing: -0.02em;
     }
     p{
@@ -64,9 +108,9 @@
     }
 
     .question{
-      margin-top: 14px;
+      margin-top: 10px;
       font-size: clamp(18px, 2.6vw, 20px);
-      font-weight: 800;
+      font-weight: 900;
     }
 
     .btnRow{
@@ -75,8 +119,7 @@
       gap: 12px;
       flex-wrap: wrap;
       align-items:center;
-      justify-content:flex-start;
-      position: relative;
+      justify-content:center;
     }
 
     button{
@@ -91,8 +134,8 @@
       transition: transform 140ms ease, filter 140ms ease, opacity 140ms ease, box-shadow 140ms ease;
       position: relative;
       will-change: transform;
-      min-width: 120px;
-      font-weight: 800;
+      min-width: 140px;
+      font-weight: 900;
     }
     button:active{ transform: scale(0.98); }
 
@@ -102,6 +145,7 @@
       box-shadow: 0 10px 24px rgba(255,77,136,0.28);
     }
 
+    /* NO button will detach and become fixed on the viewport */
     #noBtn{
       background:#fff;
       color: var(--pink2);
@@ -110,9 +154,25 @@
 
     #msgBox{
       margin-top: 14px;
-      font-weight: 750;
+      font-weight: 800;
       opacity: 0.95;
-      min-height: 24px;
+      min-height: 26px;
+    }
+
+    /* YES “aggressive” wiggle */
+    .wiggle{ animation: wiggle 260ms ease-in-out; }
+    @keyframes wiggle{
+      0%{ transform: scale(var(--ys)) rotate(0deg); }
+      30%{ transform: scale(var(--ys)) rotate(-2deg); }
+      60%{ transform: scale(var(--ys)) rotate(2deg); }
+      100%{ transform: scale(var(--ys)) rotate(0deg); }
+    }
+
+    /* NO explode animation */
+    .boom{ animation: boom 420ms ease-out forwards; }
+    @keyframes boom{
+      35%{ transform: translate(0,0) scale(1.2) rotate(8deg); opacity: 1; }
+      100%{ transform: translate(0,0) scale(3.2) rotate(18deg); opacity: 0; filter: blur(2px); }
     }
 
     /* Celebration overlay */
@@ -125,10 +185,8 @@
     }
     #celebrate.show{ display:block; }
 
-    /* Fireworks particles */
     .spark{
       position: absolute;
-      left: 0; top: 0;
       width: 8px; height: 8px;
       border-radius: 999px;
       opacity: 0.95;
@@ -160,47 +218,32 @@
       }
     }
 
-    /* NO explode animation */
-    .boom{
-      animation: boom 420ms ease-out forwards;
-    }
-    @keyframes boom{
-      35%{ transform: translate(var(--tx), var(--ty)) scale(1.2) rotate(8deg); opacity: 1; }
-      100%{ transform: translate(var(--tx), var(--ty)) scale(3.2) rotate(18deg); opacity: 0; filter: blur(2px); }
-    }
-
-    /* YES “aggressive” wiggle */
-    .wiggle{
-      animation: wiggle 260ms ease-in-out;
-    }
-    @keyframes wiggle{
-      0%{ transform: scale(var(--ys)) rotate(0deg); }
-      30%{ transform: scale(var(--ys)) rotate(-2deg); }
-      60%{ transform: scale(var(--ys)) rotate(2deg); }
-      100%{ transform: scale(var(--ys)) rotate(0deg); }
-    }
-
-    /* Mobile: stack buttons */
+    /* Mobile: make buttons full width inside heart */
     @media (max-width: 420px){
-      .btnRow{ gap: 10px; }
-      button{ width: 100%; }
+      button{ width: 100%; min-width: 0; }
+      .inner{ width: 92%; }
     }
   </style>
 </head>
+
 <body>
   <div class="wrap">
-    <div class="card" id="card">
-      <div class="badge">💌</div>
-      <h1>HALLO, Masha 💗</h1>
-      <p>Quick question:</p>
-      <div class="question">Will you be my Valentine?</div>
+    <div class="heartCard" id="heartCard">
+      <div class="content">
+        <div class="inner">
+          <div class="badge">💌</div>
+          <h1>HALLO, Masha 💗</h1>
+          <p>Quick question:</p>
+          <div class="question">Will you be my Valentine?</div>
 
-      <div class="btnRow" id="btnRow">
-        <button id="yesBtn" type="button">Yes</button>
-        <button id="noBtn" type="button">No</button>
+          <div class="btnRow" id="btnRow">
+            <button id="yesBtn" type="button">Yes</button>
+            <button id="noBtn" type="button">No</button>
+          </div>
+
+          <div id="msgBox"></div>
+        </div>
       </div>
-
-      <div id="msgBox"></div>
     </div>
   </div>
 
@@ -209,37 +252,32 @@
   <script>
     const yesBtn = document.getElementById("yesBtn");
     const noBtn  = document.getElementById("noBtn");
-    const card   = document.getElementById("card");
-    const celebrate = document.getElementById("celebrate");
     const msgBox = document.getElementById("msgBox");
+    const celebrate = document.getElementById("celebrate");
 
     let noClicks = 0;
+    let yesScale = 1.0;
     let noDetached = false;
 
-    // YES scaling (also grows as NO is clicked)
-    let yesScale = 1.0;
-
-    // Funny lines for each NO click (10 total)
     const noLines = [
       "wow… no again?",
-      "that’s CRAZY behavior 😭",
-      "ok but like… why though?",
+      "GAY",
+      "Translating... GLORY TO ISRAEL",
       "this is starting to get hurtful….",
-      "bestie please",
-      "the button is literally begging",
-      "JUST CLICK YES ALREADY 😭",
+      "I see how it is...",
+      "You're just hurting the button's feelings at this point",
+      "JUST CLICK YES ALREADY",
       "i’m watching you pick no on purpose",
-      "last chance… be nice 😐",
-      "alright. consequences."
+      ":(",
+      "alright. i'll remember that!"
     ];
 
-    // YES click: celebrate and lock in
+    // YES click: celebrate and lock
     yesBtn.addEventListener("click", () => {
-      // final dramatic grow
-      yesScale = Math.min(yesScale + 0.25, 2.6);
+      yesScale = Math.min(yesScale + 0.25, 2.8);
       applyYesEnergy(true);
 
-      msgBox.textContent = "✅";
+      msgBox.textContent = "🎉";
       launchCelebration();
 
       yesBtn.disabled = true;
@@ -248,29 +286,26 @@
       noBtn.style.cursor = "default";
     });
 
-    // NO click: shrink slightly each time, move around, funny text, explode at 10
+    // NO click: now moves anywhere on SCREEN, never off-screen, shrinks each click, explodes at 10
     noBtn.addEventListener("click", () => {
       noClicks++;
 
       if (!noDetached){
-        detachNoButton();
+        detachNoToViewport();
         noDetached = true;
       }
 
-      // Shrink NO a bit every click
-      const noScale = Math.max(0.35, 1 - noClicks * 0.06); // 10 clicks -> ~0.4
-      // Make sure it keeps its translate-ish look if we ever add it
+      const noScale = Math.max(0.35, 1 - noClicks * 0.05); // 10 clicks -> ~0.5
       noBtn.style.transform = `scale(${noScale})`;
 
-      // Funny bottom text
       msgBox.textContent = noLines[Math.min(noClicks - 1, noLines.length - 1)];
 
       // YES gets bigger + more intense every NO click
-      yesScale = Math.min(yesScale + 0.12, 2.4);
+      yesScale = Math.min(yesScale + 0.14, 2.6);
       applyYesEnergy();
 
-      // Keep NO moving (a little) each click to be annoying
-      moveNoRandom();
+      // Move NO somewhere visible on the viewport
+      moveNoOnScreen();
 
       if (noClicks >= 10){
         explodeNo();
@@ -278,20 +313,17 @@
     });
 
     function applyYesEnergy(extra=false){
-      // scale + glow increases with yesScale
       yesBtn.style.setProperty("--ys", yesScale.toFixed(2));
       yesBtn.style.transform = `scale(${yesScale})`;
 
-      const glow = 0.20 + (yesScale - 1) * 0.25; // grows with scale
-      yesBtn.style.boxShadow = `0 10px 24px rgba(255,77,136,0.28), 0 0 28px rgba(255,77,136,${Math.min(glow,0.85)})`;
+      const glow = 0.22 + (yesScale - 1) * 0.30;
+      yesBtn.style.boxShadow =
+        `0 10px 24px rgba(255,77,136,0.28), 0 0 30px rgba(255,77,136,${Math.min(glow,0.9)})`;
 
-      // Wiggle more often as it gets “aggressive”
       yesBtn.classList.remove("wiggle");
-      // force reflow so animation retriggers
       void yesBtn.offsetWidth;
       yesBtn.classList.add("wiggle");
 
-      // Change text slightly as intensity rises (no "I love you")
       if (!extra){
         if (yesScale < 1.35) yesBtn.textContent = "Yes";
         else if (yesScale < 1.75) yesBtn.textContent = "YES";
@@ -302,42 +334,38 @@
       }
     }
 
-    function detachNoButton(){
-      // Place NO absolutely within the card, keeping its current spot
-      const cardRect = card.getBoundingClientRect();
-      const noRect = noBtn.getBoundingClientRect();
+    function detachNoToViewport(){
+      // Convert NO into a viewport-floating button
+      const rect = noBtn.getBoundingClientRect();
 
-      const left = noRect.left - cardRect.left;
-      const top  = noRect.top  - cardRect.top;
-
-      card.style.position = "relative";
-
-      noBtn.style.position = "absolute";
-      noBtn.style.left = `${left}px`;
-      noBtn.style.top  = `${top}px`;
-
-      // keep comfortable tapping on mobile
-      noBtn.style.minWidth = "120px";
+      noBtn.style.position = "fixed";
+      noBtn.style.left = rect.left + "px";
+      noBtn.style.top  = rect.top + "px";
+      noBtn.style.zIndex = "40";         // above heart
     }
 
-    function moveNoRandom(){
-      const pad = 14;
+    function moveNoOnScreen(){
+      const pad = 12; // safe padding from edges
 
-      const cardRect = card.getBoundingClientRect();
-      const btnRect  = noBtn.getBoundingClientRect();
+      // Force layout read after scaling so width/height are accurate
+      const rect = noBtn.getBoundingClientRect();
+      const bw = rect.width;
+      const bh = rect.height;
 
-      const maxX = cardRect.width - btnRect.width - pad*2;
-      const maxY = cardRect.height - btnRect.height - pad*2;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
 
-      const x = pad + Math.random() * Math.max(0, maxX);
-      const y = pad + Math.random() * Math.max(0, maxY);
+      // Choose a random visible spot
+      const minX = pad;
+      const maxX = Math.max(pad, vw - bw - pad);
+      const minY = pad;
+      const maxY = Math.max(pad, vh - bh - pad);
+
+      const x = minX + Math.random() * (maxX - minX);
+      const y = minY + Math.random() * (maxY - minY);
 
       noBtn.style.left = x + "px";
       noBtn.style.top  = y + "px";
-
-      // store for boom animation vars
-      noBtn.style.setProperty("--tx", x + "px");
-      noBtn.style.setProperty("--ty", y + "px");
     }
 
     function explodeNo(){
@@ -345,18 +373,15 @@
       const cx = rect.left + rect.width/2;
       const cy = rect.top + rect.height/2;
 
-      // button boom
       noBtn.classList.add("boom");
-
-      // little burst
-      burst(cx, cy, 30);
+      burst(cx, cy, 34);
 
       setTimeout(() => {
         noBtn.style.display = "none";
       }, 430);
     }
 
-    // Celebration fireworks (hearts + sparks)
+    // Celebration fireworks
     function launchCelebration(){
       celebrate.classList.add("show");
 
@@ -367,7 +392,7 @@
         i++;
         const x = window.innerWidth  * (0.15 + Math.random()*0.7);
         const y = window.innerHeight * (0.20 + Math.random()*0.5);
-        burst(x, y, 36);
+        burst(x, y, 38);
 
         if (i >= bursts){
           clearInterval(interval);
@@ -419,6 +444,11 @@
         }
       }
     }
+
+    // If screen rotates/resizes, keep NO button visible
+    window.addEventListener("resize", () => {
+      if (noDetached && noBtn.style.display !== "none") moveNoOnScreen();
+    });
   </script>
 </body>
 </html>
