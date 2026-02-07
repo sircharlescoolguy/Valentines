@@ -36,10 +36,10 @@
       justify-content:center;
     }
 
-    /* Bigger heart area */
+    /* Bigger heart area so things fit */
     .heartStage{
-      width: min(860px, 96vw);          /* bigger */
-      aspect-ratio: 1.45 / 1;           /* slightly wider */
+      width: min(920px, 98vw);
+      aspect-ratio: 1.55 / 1;
       position: relative;
       filter: drop-shadow(0 24px 70px var(--shadow));
       user-select:none;
@@ -51,6 +51,7 @@
       display:block;
     }
 
+    /* Content sits on top */
     .content{
       position:absolute;
       inset: 0;
@@ -58,12 +59,12 @@
       align-items:center;
       justify-content:center;
       text-align:center;
-      padding: clamp(14px, 2.6vw, 28px);
+      padding: clamp(14px, 2.6vw, 30px);
       pointer-events: auto;
     }
 
     .inner{
-      width: min(520px, 92%); /* more room for text/buttons */
+      width: min(540px, 92%);
     }
 
     .badge{
@@ -78,7 +79,7 @@
 
     h1{
       margin: 0 0 8px;
-      font-size: clamp(26px, 4.8vw, 46px);
+      font-size: clamp(26px, 4.8vw, 48px);
       letter-spacing: -0.02em;
     }
 
@@ -127,7 +128,6 @@
       box-shadow: 0 10px 24px rgba(255,77,136,0.28);
     }
 
-    /* Tweaked border a bit */
     #noBtn{
       background:#fff;
       color: var(--pink2);
@@ -142,6 +142,7 @@
       min-height: 26px;
     }
 
+    /* YES “aggressive” wiggle */
     .wiggle{ animation: wiggle 260ms ease-in-out; }
     @keyframes wiggle{
       0%{ transform: scale(var(--ys)) rotate(0deg); }
@@ -150,12 +151,14 @@
       100%{ transform: scale(var(--ys)) rotate(0deg); }
     }
 
+    /* NO explode animation */
     .boom{ animation: boom 420ms ease-out forwards; }
     @keyframes boom{
       35%{ transform: scale(1.2) rotate(8deg); opacity: 1; }
       100%{ transform: scale(3.2) rotate(18deg); opacity: 0; filter: blur(2px); }
     }
 
+    /* Celebration overlay */
     #celebrate{
       position: fixed;
       inset: 0;
@@ -198,9 +201,10 @@
       }
     }
 
-    @media (max-width: 420px){
+    @media (max-width: 520px){
       button{ width: 100%; min-width: 0; }
-      .heartStage{ width: min(900px, 98vw); } /* keep heart big on phones */
+      .heartStage{ width: min(980px, 99vw); }
+      .inner{ width: min(520px, 96%); }
     }
   </style>
 </head>
@@ -208,13 +212,14 @@
 <body>
   <div class="wrap">
     <div class="heartStage" id="heartStage">
+      <!-- Real heart shape (SVG) -->
       <svg class="heartSvg" viewBox="0 0 900 650" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
         <path
-          d="M450 610
-             C 120 430, 40 270, 140 150
-             C 220 60, 350 75, 450 190
-             C 550 75, 680 60, 760 150
-             C 860 270, 780 430, 450 610 Z"
+          d="M450 625
+             C 105 445, 25 270, 135 145
+             C 230 35, 365 70, 450 195
+             C 535 70, 670 35, 765 145
+             C 875 270, 795 445, 450 625 Z"
           fill="var(--cardFill)"
           stroke="var(--cardBorder)"
           stroke-width="4"
@@ -251,25 +256,27 @@
     let yesScale = 1.0;
     let noDetached = false;
 
+    // Your strings (one line adjusted for safety)
     const noLines = [
       "wow… no again?",
-  "GAY",
-  "Translating... GLORY TO ISRAEL",
-  "this is starting to get hurtful….",
-  "I see how it is...",
-  "You're just hurting the button's feelings at this point",
-  "JUST CLICK YES ALREADY",
-  "i’m watching you pick no on purpose",
-  ":(",
-  "alright. i'll remember that!"
+      "GAYYYY", 
+      "Translating... GLORY TO ISRAEL",
+      "this is starting to get hurtful….",
+      "I see how it is...",
+      "You're just hurting the button's feelings at this point",
+      "JUST CLICK YES ALREADY",
+      "i’m watching you pick no on purpose",
+      ":(",
+      "alright. i'll remember that!"
     ];
 
     yesBtn.addEventListener("click", () => {
+      // big final grow + celebration
       yesScale = Math.min(yesScale + 0.25, 2.8);
       applyYesEnergy(true);
 
       msgBox.textContent = "🎉";
-      launchCelebration();
+      launchCelebrationLong();
 
       yesBtn.disabled = true;
       noBtn.disabled = true;
@@ -285,22 +292,27 @@
         noDetached = true;
       }
 
+      // NO gets smaller each click
       const noScale = Math.max(0.35, 1 - noClicks * 0.05);
       noBtn.style.transform = `scale(${noScale})`;
 
+      // Funny text per click
       msgBox.textContent = noLines[Math.min(noClicks - 1, noLines.length - 1)];
 
+      // YES grows and gets more intense each NO click
       yesScale = Math.min(yesScale + 0.14, 2.6);
-      applyYesEnergy();
+      applyYesEnergy(false);
 
-      moveNoInSafeZone();
+      // Move NO within a smaller middle range (especially on phones)
+      moveNoInMiddleZone();
 
+      // Explode on click 10
       if (noClicks >= 10){
         explodeNo();
       }
     });
 
-    function applyYesEnergy(extra=false){
+    function applyYesEnergy(finalClick){
       yesBtn.style.setProperty("--ys", yesScale.toFixed(2));
       yesBtn.style.transform = `scale(${yesScale})`;
 
@@ -312,7 +324,7 @@
       void yesBtn.offsetWidth;
       yesBtn.classList.add("wiggle");
 
-      if (!extra){
+      if (!finalClick){
         if (yesScale < 1.35) yesBtn.textContent = "Yes";
         else if (yesScale < 1.75) yesBtn.textContent = "YES";
         else if (yesScale < 2.1) yesBtn.textContent = "YES ✅";
@@ -330,9 +342,11 @@
       noBtn.style.zIndex = "40";
     }
 
-    // Moves NO within a centered “safe zone” so it never clips
-    function moveNoInSafeZone(){
+    // Smaller “middle zone” so it doesn’t run away on phones
+    function moveNoInMiddleZone(){
       const pad = 10;
+
+      // After scaling, read current size
       const rect = noBtn.getBoundingClientRect();
       const bw = rect.width;
       const bh = rect.height;
@@ -340,9 +354,12 @@
       const vw = window.innerWidth;
       const vh = window.innerHeight;
 
-      // Safe zone = middle 70% of screen
-      const zoneW = vw * 0.70;
-      const zoneH = vh * 0.70;
+      const isPhone = vw <= 520;
+
+      // Smaller jump region:
+      // phones: ~38% of screen, desktop: ~50% of screen
+      const zoneW = vw * (isPhone ? 0.38 : 0.50);
+      const zoneH = vh * (isPhone ? 0.38 : 0.50);
 
       const zoneLeft = (vw - zoneW) / 2;
       const zoneTop  = (vh - zoneH) / 2;
@@ -373,26 +390,33 @@
       }, 430);
     }
 
-    function launchCelebration(){
+    // Longer, more continuous “fireworks”
+    function launchCelebrationLong(){
       celebrate.classList.add("show");
 
-      const bursts = 9;
-      let i = 0;
+      const start = Date.now();
+      const DURATION_MS = 9000; // ~9 seconds
+      const INTERVAL_MS = 120;  // frequent bursts
 
       const interval = setInterval(() => {
-        i++;
-        const x = window.innerWidth  * (0.15 + Math.random()*0.7);
-        const y = window.innerHeight * (0.20 + Math.random()*0.5);
-        burst(x, y, 38);
+        const elapsed = Date.now() - start;
 
-        if (i >= bursts){
+        // 1–2 bursts per tick keeps it “continuous”
+        const burstsThisTick = (Math.random() < 0.55) ? 1 : 2;
+        for (let b = 0; b < burstsThisTick; b++){
+          const x = window.innerWidth  * (0.18 + Math.random()*0.64);
+          const y = window.innerHeight * (0.18 + Math.random()*0.56);
+          burst(x, y, 26); // smaller per burst so phones don’t lag
+        }
+
+        if (elapsed >= DURATION_MS){
           clearInterval(interval);
           setTimeout(() => {
             celebrate.classList.remove("show");
             celebrate.innerHTML = "";
-          }, 950);
+          }, 1200);
         }
-      }, 140);
+      }, INTERVAL_MS);
     }
 
     function burst(x, y, count){
@@ -437,7 +461,7 @@
     }
 
     window.addEventListener("resize", () => {
-      if (noDetached && noBtn.style.display !== "none") moveNoInSafeZone();
+      if (noDetached && noBtn.style.display !== "none") moveNoInMiddleZone();
     });
   </script>
 </body>
