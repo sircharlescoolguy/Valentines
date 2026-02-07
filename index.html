@@ -13,7 +13,7 @@
       --bg2:#fff;
       --shadow: rgba(255,77,136,0.22);
       --text:#171717;
-      --cardBorder: rgba(255,105,180,0.25);
+      --cardBorder: rgba(255,105,180,0.28);
       --cardFill: rgba(255,255,255,0.92);
     }
 
@@ -36,23 +36,21 @@
       justify-content:center;
     }
 
-    /* Heart container */
+    /* Bigger heart area */
     .heartStage{
-      width: min(720px, 94vw);
-      aspect-ratio: 1.35 / 1; /* wide heart like your screenshot */
+      width: min(860px, 96vw);          /* bigger */
+      aspect-ratio: 1.45 / 1;           /* slightly wider */
       position: relative;
-      filter: drop-shadow(0 20px 60px var(--shadow));
+      filter: drop-shadow(0 24px 70px var(--shadow));
       user-select:none;
     }
 
-    /* SVG fills the stage */
     .heartSvg{
       width: 100%;
       height: 100%;
       display:block;
     }
 
-    /* Content sits centered inside the heart */
     .content{
       position:absolute;
       inset: 0;
@@ -60,12 +58,12 @@
       align-items:center;
       justify-content:center;
       text-align:center;
-      padding: clamp(16px, 3vw, 30px);
+      padding: clamp(14px, 2.6vw, 28px);
       pointer-events: auto;
     }
 
     .inner{
-      width: min(460px, 92%);
+      width: min(520px, 92%); /* more room for text/buttons */
     }
 
     .badge{
@@ -80,7 +78,7 @@
 
     h1{
       margin: 0 0 8px;
-      font-size: clamp(26px, 4.8vw, 44px);
+      font-size: clamp(26px, 4.8vw, 46px);
       letter-spacing: -0.02em;
     }
 
@@ -115,10 +113,10 @@
       user-select:none;
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
-      transition: transform 140ms ease, filter 140ms ease, opacity 140ms ease, box-shadow 140ms ease;
+      transition: transform 140ms ease, filter 140ms ease, opacity 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
       position: relative;
       will-change: transform;
-      min-width: 150px;
+      min-width: 160px;
       font-weight: 900;
     }
     button:active{ transform: scale(0.98); }
@@ -129,10 +127,12 @@
       box-shadow: 0 10px 24px rgba(255,77,136,0.28);
     }
 
+    /* Tweaked border a bit */
     #noBtn{
       background:#fff;
       color: var(--pink2);
-      border:1px solid rgba(255,46,116,0.25);
+      border: 2px solid rgba(255,46,116,0.28);
+      box-shadow: 0 8px 18px rgba(255,46,116,0.10);
     }
 
     #msgBox{
@@ -156,7 +156,6 @@
       100%{ transform: scale(3.2) rotate(18deg); opacity: 0; filter: blur(2px); }
     }
 
-    /* Celebration overlay */
     #celebrate{
       position: fixed;
       inset: 0;
@@ -201,6 +200,7 @@
 
     @media (max-width: 420px){
       button{ width: 100%; min-width: 0; }
+      .heartStage{ width: min(900px, 98vw); } /* keep heart big on phones */
     }
   </style>
 </head>
@@ -208,7 +208,6 @@
 <body>
   <div class="wrap">
     <div class="heartStage" id="heartStage">
-      <!-- REAL HEART SHAPE -->
       <svg class="heartSvg" viewBox="0 0 900 650" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
         <path
           d="M450 610
@@ -253,16 +252,16 @@
     let noDetached = false;
 
     const noLines = [
-       "wow… no again?",
-      "GAY",
-      "Translating... GLORY TO ISRAEL",
-      "this is starting to get hurtful….",
-      "I see how it is...",
-      "You're just hurting the button's feelings at this point",
-      "JUST CLICK YES ALREADY",
-      "i’m watching you pick no on purpose",
-      ":(",
-      "alright. i'll remember that!"
+      "wow… no again?",
+  "GAY",
+  "Translating... GLORY TO ISRAEL",
+  "this is starting to get hurtful….",
+  "I see how it is...",
+  "You're just hurting the button's feelings at this point",
+  "JUST CLICK YES ALREADY",
+  "i’m watching you pick no on purpose",
+  ":(",
+  "alright. i'll remember that!"
     ];
 
     yesBtn.addEventListener("click", () => {
@@ -294,7 +293,7 @@
       yesScale = Math.min(yesScale + 0.14, 2.6);
       applyYesEnergy();
 
-      moveNoOnScreen();
+      moveNoInSafeZone();
 
       if (noClicks >= 10){
         explodeNo();
@@ -331,8 +330,9 @@
       noBtn.style.zIndex = "40";
     }
 
-    function moveNoOnScreen(){
-      const pad = 12;
+    // Moves NO within a centered “safe zone” so it never clips
+    function moveNoInSafeZone(){
+      const pad = 10;
       const rect = noBtn.getBoundingClientRect();
       const bw = rect.width;
       const bh = rect.height;
@@ -340,10 +340,18 @@
       const vw = window.innerWidth;
       const vh = window.innerHeight;
 
-      const minX = pad;
-      const maxX = Math.max(pad, vw - bw - pad);
-      const minY = pad;
-      const maxY = Math.max(pad, vh - bh - pad);
+      // Safe zone = middle 70% of screen
+      const zoneW = vw * 0.70;
+      const zoneH = vh * 0.70;
+
+      const zoneLeft = (vw - zoneW) / 2;
+      const zoneTop  = (vh - zoneH) / 2;
+
+      const minX = zoneLeft + pad;
+      const maxX = Math.max(minX, zoneLeft + zoneW - bw - pad);
+
+      const minY = zoneTop + pad;
+      const maxY = Math.max(minY, zoneTop + zoneH - bh - pad);
 
       const x = minX + Math.random() * (maxX - minX);
       const y = minY + Math.random() * (maxY - minY);
@@ -429,7 +437,7 @@
     }
 
     window.addEventListener("resize", () => {
-      if (noDetached && noBtn.style.display !== "none") moveNoOnScreen();
+      if (noDetached && noBtn.style.display !== "none") moveNoInSafeZone();
     });
   </script>
 </body>
