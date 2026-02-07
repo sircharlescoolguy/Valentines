@@ -285,4 +285,140 @@
       const glow = 0.20 + (yesScale - 1) * 0.25; // grows with scale
       yesBtn.style.boxShadow = `0 10px 24px rgba(255,77,136,0.28), 0 0 28px rgba(255,77,136,${Math.min(glow,0.85)})`;
 
-      // Wiggle
+      // Wiggle more often as it gets “aggressive”
+      yesBtn.classList.remove("wiggle");
+      // force reflow so animation retriggers
+      void yesBtn.offsetWidth;
+      yesBtn.classList.add("wiggle");
+
+      // Change text slightly as intensity rises (no "I love you")
+      if (!extra){
+        if (yesScale < 1.35) yesBtn.textContent = "Yes";
+        else if (yesScale < 1.75) yesBtn.textContent = "YES";
+        else if (yesScale < 2.1) yesBtn.textContent = "YES ✅";
+        else yesBtn.textContent = "YES NOW ✅";
+      } else {
+        yesBtn.textContent = "YES ✅";
+      }
+    }
+
+    function detachNoButton(){
+      // Place NO absolutely within the card, keeping its current spot
+      const cardRect = card.getBoundingClientRect();
+      const noRect = noBtn.getBoundingClientRect();
+
+      const left = noRect.left - cardRect.left;
+      const top  = noRect.top  - cardRect.top;
+
+      card.style.position = "relative";
+
+      noBtn.style.position = "absolute";
+      noBtn.style.left = `${left}px`;
+      noBtn.style.top  = `${top}px`;
+
+      // keep comfortable tapping on mobile
+      noBtn.style.minWidth = "120px";
+    }
+
+    function moveNoRandom(){
+      const pad = 14;
+
+      const cardRect = card.getBoundingClientRect();
+      const btnRect  = noBtn.getBoundingClientRect();
+
+      const maxX = cardRect.width - btnRect.width - pad*2;
+      const maxY = cardRect.height - btnRect.height - pad*2;
+
+      const x = pad + Math.random() * Math.max(0, maxX);
+      const y = pad + Math.random() * Math.max(0, maxY);
+
+      noBtn.style.left = x + "px";
+      noBtn.style.top  = y + "px";
+
+      // store for boom animation vars
+      noBtn.style.setProperty("--tx", x + "px");
+      noBtn.style.setProperty("--ty", y + "px");
+    }
+
+    function explodeNo(){
+      const rect = noBtn.getBoundingClientRect();
+      const cx = rect.left + rect.width/2;
+      const cy = rect.top + rect.height/2;
+
+      // button boom
+      noBtn.classList.add("boom");
+
+      // little burst
+      burst(cx, cy, 30);
+
+      setTimeout(() => {
+        noBtn.style.display = "none";
+      }, 430);
+    }
+
+    // Celebration fireworks (hearts + sparks)
+    function launchCelebration(){
+      celebrate.classList.add("show");
+
+      const bursts = 9;
+      let i = 0;
+
+      const interval = setInterval(() => {
+        i++;
+        const x = window.innerWidth  * (0.15 + Math.random()*0.7);
+        const y = window.innerHeight * (0.20 + Math.random()*0.5);
+        burst(x, y, 36);
+
+        if (i >= bursts){
+          clearInterval(interval);
+          setTimeout(() => {
+            celebrate.classList.remove("show");
+            celebrate.innerHTML = "";
+          }, 950);
+        }
+      }, 140);
+    }
+
+    function burst(x, y, count){
+      const emojis = ["💗","💖","💘","💝","💕","❤️"];
+      const sparkColors = ["#ff4d88","#ff2e74","#ff6fb0","#ff9ac8","#ffd1dc","#ffffff"];
+
+      for (let i=0; i<count; i++){
+        const s = document.createElement("div");
+        s.className = "spark";
+        s.style.left = x + "px";
+        s.style.top  = y + "px";
+
+        const angle = Math.random()*Math.PI*2;
+        const dist  = 60 + Math.random()*180;
+        const dx = Math.cos(angle)*dist;
+        const dy = Math.sin(angle)*dist;
+
+        s.style.setProperty("--dx", dx + "px");
+        s.style.setProperty("--dy", dy + "px");
+        s.style.background = sparkColors[(Math.random()*sparkColors.length)|0];
+
+        celebrate.appendChild(s);
+        setTimeout(() => s.remove(), 950);
+
+        if (Math.random() < 0.40){
+          const h = document.createElement("div");
+          h.className = "heart";
+          h.textContent = emojis[(Math.random()*emojis.length)|0];
+          h.style.left = x + "px";
+          h.style.top  = y + "px";
+
+          const hdx = (Math.random()*2-1) * (40 + Math.random()*140);
+          const hdy = -(40 + Math.random()*180);
+
+          h.style.setProperty("--dx", hdx + "px");
+          h.style.setProperty("--dy", hdy + "px");
+
+          celebrate.appendChild(h);
+          setTimeout(() => h.remove(), 1200);
+        }
+      }
+    }
+  </script>
+</body>
+</html>
