@@ -10,7 +10,7 @@
       --pink2:#ff2e74;
       --bg1:#ffd1dc;
       --bg2:#fff;
-      --card: rgba(255,255,255,0.85);
+      --card: rgba(255,255,255,0.88);
       --shadow: rgba(255,77,136,0.18);
       --text:#171717;
     }
@@ -29,10 +29,7 @@
       padding: 18px;
     }
 
-    .wrap{
-      width:min(740px, 94vw);
-      position:relative;
-    }
+    .wrap{ width:min(740px, 94vw); position:relative; }
 
     .card{
       background: var(--card);
@@ -69,7 +66,7 @@
     .question{
       margin-top: 14px;
       font-size: clamp(18px, 2.6vw, 20px);
-      font-weight: 700;
+      font-weight: 800;
     }
 
     .btnRow{
@@ -79,6 +76,7 @@
       flex-wrap: wrap;
       align-items:center;
       justify-content:flex-start;
+      position: relative;
     }
 
     button{
@@ -90,10 +88,11 @@
       user-select:none;
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
-      transition: transform 140ms ease, filter 140ms ease, opacity 140ms ease;
+      transition: transform 140ms ease, filter 140ms ease, opacity 140ms ease, box-shadow 140ms ease;
       position: relative;
       will-change: transform;
       min-width: 120px;
+      font-weight: 800;
     }
     button:active{ transform: scale(0.98); }
 
@@ -101,21 +100,19 @@
       background: var(--pink);
       color:white;
       box-shadow: 0 10px 24px rgba(255,77,136,0.28);
-      font-weight: 700;
     }
 
-    /* NO button starts normal, then becomes absolute when it starts moving */
     #noBtn{
       background:#fff;
       color: var(--pink2);
       border:1px solid rgba(255,46,116,0.25);
-      font-weight: 700;
     }
 
-    .tinyNote{
+    #msgBox{
       margin-top: 14px;
-      font-size: 13px;
-      opacity: 0.65;
+      font-weight: 750;
+      opacity: 0.95;
+      min-height: 24px;
     }
 
     /* Celebration overlay */
@@ -127,13 +124,6 @@
       display:none;
     }
     #celebrate.show{ display:block; }
-
-    #msgBox{
-      margin-top: 12px;
-      font-weight: 650;
-      opacity: 0.95;
-      min-height: 22px;
-    }
 
     /* Fireworks particles */
     .spark{
@@ -170,7 +160,7 @@
       }
     }
 
-    /* “No” explode animation */
+    /* NO explode animation */
     .boom{
       animation: boom 420ms ease-out forwards;
     }
@@ -179,7 +169,18 @@
       100%{ transform: translate(var(--tx), var(--ty)) scale(3.2) rotate(18deg); opacity: 0; filter: blur(2px); }
     }
 
-    /* Keep it nice on phones */
+    /* YES “aggressive” wiggle */
+    .wiggle{
+      animation: wiggle 260ms ease-in-out;
+    }
+    @keyframes wiggle{
+      0%{ transform: scale(var(--ys)) rotate(0deg); }
+      30%{ transform: scale(var(--ys)) rotate(-2deg); }
+      60%{ transform: scale(var(--ys)) rotate(2deg); }
+      100%{ transform: scale(var(--ys)) rotate(0deg); }
+    }
+
+    /* Mobile: stack buttons */
     @media (max-width: 420px){
       .btnRow{ gap: 10px; }
       button{ width: 100%; }
@@ -190,8 +191,8 @@
   <div class="wrap">
     <div class="card" id="card">
       <div class="badge">💌</div>
-      <h1>Hey, Masha</h1>
-      <p>Quick question for you:</p>
+      <h1>HALLO, Masha 💗</h1>
+      <p>Quick question:</p>
       <div class="question">Will you be my Valentine?</div>
 
       <div class="btnRow" id="btnRow">
@@ -200,7 +201,6 @@
       </div>
 
       <div id="msgBox"></div>
-      <div class="tinyNote">Tip: this is made for phones too — just tap.</div>
     </div>
   </div>
 
@@ -210,199 +210,79 @@
     const yesBtn = document.getElementById("yesBtn");
     const noBtn  = document.getElementById("noBtn");
     const card   = document.getElementById("card");
-    const btnRow = document.getElementById("btnRow");
     const celebrate = document.getElementById("celebrate");
     const msgBox = document.getElementById("msgBox");
 
-    let yesPresses = 0;
     let noClicks = 0;
     let noDetached = false;
 
-    // YES: gets bigger every tap, then triggers celebration
+    // YES scaling (also grows as NO is clicked)
+    let yesScale = 1.0;
+
+    // Funny lines for each NO click (10 total)
+    const noLines = [
+      "wow… no again?",
+      "that’s CRAZY behavior 😭",
+      "ok but like… why though?",
+      "this is starting to get hurtful….",
+      "bestie please",
+      "the button is literally begging",
+      "JUST CLICK YES ALREADY 😭",
+      "i’m watching you pick no on purpose",
+      "last chance… be nice 😐",
+      "alright. consequences."
+    ];
+
+    // YES click: celebrate and lock in
     yesBtn.addEventListener("click", () => {
-      yesPresses++;
+      // final dramatic grow
+      yesScale = Math.min(yesScale + 0.25, 2.6);
+      applyYesEnergy(true);
 
-      const grow = 1 + Math.min(yesPresses * 0.12, 0.9); // cap growth
-      yesBtn.style.transform = `scale(${grow})`;
-
-      // Small feedback text (no "I love you")
-      if (yesPresses === 1) msgBox.textContent = "Locked in 😌";
-      if (yesPresses === 2) msgBox.textContent = "Okay okay 😭";
-      if (yesPresses >= 3) msgBox.textContent = "W decision ✅";
-
-      if (yesPresses >= 1) {
-        // Make NO slightly less tempting each time
-        noBtn.style.filter = `saturate(${Math.max(0.5, 1 - yesPresses*0.12)})`;
-      }
-
-      // Celebration on first YES is fine; you asked "once she presses yes"
+      msgBox.textContent = "✅";
       launchCelebration();
-      // Disable further clicking so it doesn't get weird
+
       yesBtn.disabled = true;
       noBtn.disabled = true;
       yesBtn.style.cursor = "default";
       noBtn.style.cursor = "default";
-      msgBox.textContent = "🎉";
     });
 
-    // NO: moves a couple times, then shrinks, then explodes
+    // NO click: shrink slightly each time, move around, funny text, explode at 10
     noBtn.addEventListener("click", () => {
       noClicks++;
 
-      // First: detach button so it can move around freely inside the card
       if (!noDetached){
         detachNoButton();
         noDetached = true;
       }
 
-      if (noClicks <= 3){
-        // Move a couple times (random positions)
-        moveNoRandom();
-        msgBox.textContent = ["Wait—", "Nah 😭", "You sure?"][noClicks-1] || "";
-        return;
-      }
+      // Shrink NO a bit every click
+      const noScale = Math.max(0.35, 1 - noClicks * 0.06); // 10 clicks -> ~0.4
+      // Make sure it keeps its translate-ish look if we ever add it
+      noBtn.style.transform = `scale(${noScale})`;
 
-      if (noClicks <= 6){
-        // Then get smaller and keep moving a bit
-        const s = Math.max(0.35, 1 - (noClicks - 3) * 0.18);
-        noBtn.style.transform = `translate(var(--tx), var(--ty)) scale(${s})`;
-        moveNoRandom();
-        msgBox.textContent = "It’s getting harder to press…";
-        return;
-      }
+      // Funny bottom text
+      msgBox.textContent = noLines[Math.min(noClicks - 1, noLines.length - 1)];
 
-      // Finally: explode
-      explodeNo();
-      msgBox.textContent = "…";
+      // YES gets bigger + more intense every NO click
+      yesScale = Math.min(yesScale + 0.12, 2.4);
+      applyYesEnergy();
+
+      // Keep NO moving (a little) each click to be annoying
+      moveNoRandom();
+
+      if (noClicks >= 10){
+        explodeNo();
+      }
     });
 
-    function detachNoButton(){
-      // Place NO absolutely within the card, keeping its current position
-      const cardRect = card.getBoundingClientRect();
-      const noRect = noBtn.getBoundingClientRect();
+    function applyYesEnergy(extra=false){
+      // scale + glow increases with yesScale
+      yesBtn.style.setProperty("--ys", yesScale.toFixed(2));
+      yesBtn.style.transform = `scale(${yesScale})`;
 
-      const left = noRect.left - cardRect.left;
-      const top  = noRect.top  - cardRect.top;
+      const glow = 0.20 + (yesScale - 1) * 0.25; // grows with scale
+      yesBtn.style.boxShadow = `0 10px 24px rgba(255,77,136,0.28), 0 0 28px rgba(255,77,136,${Math.min(glow,0.85)})`;
 
-      // Make card position context for absolute elements
-      card.style.position = "relative";
-
-      // Remove from flow and set exact spot
-      noBtn.style.position = "absolute";
-      noBtn.style.left = `${left}px`;
-      noBtn.style.top  = `${top}px`;
-
-      // Keep it tappable on mobile
-      noBtn.style.width = getComputedStyle(noBtn).width;
-    }
-
-    function moveNoRandom(){
-      const pad = 14;
-
-      const cardRect = card.getBoundingClientRect();
-      const btnRect  = noBtn.getBoundingClientRect();
-
-      // Random position within card bounds
-      const maxX = cardRect.width - btnRect.width - pad*2;
-      const maxY = cardRect.height - btnRect.height - pad*2;
-
-      const x = pad + Math.random() * Math.max(0, maxX);
-      const y = pad + Math.random() * Math.max(0, maxY);
-
-      // Set translate targets via CSS vars so other transforms can stack
-      noBtn.style.setProperty("--tx", x + "px");
-      noBtn.style.setProperty("--ty", y + "px");
-
-      // Actually move by setting left/top (more reliable on mobile)
-      noBtn.style.left = x + "px";
-      noBtn.style.top  = y + "px";
-    }
-
-    function explodeNo(){
-      // Spawn some particles at NO button
-      const rect = noBtn.getBoundingClientRect();
-      const cx = rect.left + rect.width/2;
-      const cy = rect.top + rect.height/2;
-
-      // Boom animation on the button itself
-      noBtn.classList.add("boom");
-
-      // Add a quick burst of hearts/sparks
-      burst(cx, cy, 26);
-
-      // Then hide the button after animation
-      setTimeout(() => {
-        noBtn.style.display = "none";
-      }, 430);
-    }
-
-    // Celebration fireworks (hearts + sparks)
-    function launchCelebration(){
-      celebrate.classList.add("show");
-
-      // Multiple bursts, "fireworks" vibe
-      const bursts = 8;
-      let i = 0;
-
-      const interval = setInterval(() => {
-        i++;
-        const x = window.innerWidth  * (0.15 + Math.random()*0.7);
-        const y = window.innerHeight * (0.20 + Math.random()*0.5);
-        burst(x, y, 34);
-
-        if (i >= bursts){
-          clearInterval(interval);
-          // Fade out overlay after a moment
-          setTimeout(() => {
-            celebrate.classList.remove("show");
-            celebrate.innerHTML = "";
-          }, 900);
-        }
-      }, 140);
-    }
-
-    function burst(x, y, count){
-      const emojis = ["💗","💖","💘","💝","💕","❤️"];
-      const sparkColors = ["#ff4d88","#ff2e74","#ff6fb0","#ff9ac8","#ffd1dc","#ffffff"];
-
-      for (let i=0; i<count; i++){
-        // sparks
-        const s = document.createElement("div");
-        s.className = "spark";
-        s.style.left = x + "px";
-        s.style.top  = y + "px";
-
-        const angle = Math.random()*Math.PI*2;
-        const dist  = 60 + Math.random()*180;
-        const dx = Math.cos(angle)*dist;
-        const dy = Math.sin(angle)*dist;
-
-        s.style.setProperty("--dx", dx + "px");
-        s.style.setProperty("--dy", dy + "px");
-        s.style.background = sparkColors[(Math.random()*sparkColors.length)|0];
-
-        celebrate.appendChild(s);
-        setTimeout(() => s.remove(), 950);
-
-        // hearts (less frequent so it isn't too busy)
-        if (Math.random() < 0.38){
-          const h = document.createElement("div");
-          h.className = "heart";
-          h.textContent = emojis[(Math.random()*emojis.length)|0];
-          h.style.left = x + "px";
-          h.style.top  = y + "px";
-
-          const hdx = (Math.random()*2-1) * (40 + Math.random()*140);
-          const hdy = -(40 + Math.random()*180);
-
-          h.style.setProperty("--dx", hdx + "px");
-          h.style.setProperty("--dy", hdy + "px");
-
-          celebrate.appendChild(h);
-          setTimeout(() => h.remove(), 1200);
-        }
-      }
-    }
-  </script>
-</body>
-</html>
+      // Wiggle
