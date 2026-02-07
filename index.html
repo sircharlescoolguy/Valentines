@@ -11,9 +11,10 @@
       --pink2:#ff2e74;
       --bg1:#ffd1dc;
       --bg2:#fff;
-      --card: rgba(255,255,255,0.90);
-      --shadow: rgba(255,77,136,0.18);
+      --shadow: rgba(255,77,136,0.22);
       --text:#171717;
+      --cardBorder: rgba(255,105,180,0.25);
+      --cardFill: rgba(255,255,255,0.92);
     }
 
     *{ box-sizing:border-box; }
@@ -28,7 +29,6 @@
       padding: 18px;
     }
 
-    /* Center container */
     .wrap{
       min-height: calc(100vh - 36px);
       display:flex;
@@ -36,53 +36,36 @@
       justify-content:center;
     }
 
-    /* HEART-SHAPED CARD */
-    .heartCard{
+    /* Heart container */
+    .heartStage{
+      width: min(720px, 94vw);
+      aspect-ratio: 1.35 / 1; /* wide heart like your screenshot */
       position: relative;
-      width: min(520px, 92vw);
-      aspect-ratio: 1 / 1;              /* keeps heart nice on phones */
       filter: drop-shadow(0 20px 60px var(--shadow));
+      user-select:none;
     }
 
-    /* heart body */
-    .heartCard::before,
-    .heartCard::after{
-      content:"";
-      position:absolute;
-      width: 50%;
-      height: 80%;
-      top: 10%;
-      background: var(--card);
-      border: 1px solid rgba(255,105,180,0.25);
-      border-bottom: none;
-      border-radius: 999px 999px 20px 20px;
-    }
-    .heartCard::before{
-      left: 25%;
-      transform: rotate(-45deg);
-      transform-origin: 0% 100%;
-    }
-    .heartCard::after{
-      left: 25%;
-      transform: rotate(45deg);
-      transform-origin: 100% 100%;
+    /* SVG fills the stage */
+    .heartSvg{
+      width: 100%;
+      height: 100%;
+      display:block;
     }
 
-    /* content layer sitting on top of heart */
+    /* Content sits centered inside the heart */
     .content{
       position:absolute;
       inset: 0;
       display:flex;
       align-items:center;
       justify-content:center;
-      padding: clamp(18px, 3vw, 28px);
       text-align:center;
+      padding: clamp(16px, 3vw, 30px);
       pointer-events: auto;
     }
 
     .inner{
-      width: 88%;
-      max-width: 420px;
+      width: min(460px, 92%);
     }
 
     .badge{
@@ -97,9 +80,10 @@
 
     h1{
       margin: 0 0 8px;
-      font-size: clamp(26px, 5vw, 42px);
+      font-size: clamp(26px, 4.8vw, 44px);
       letter-spacing: -0.02em;
     }
+
     p{
       margin: 10px 0;
       line-height: 1.55;
@@ -125,7 +109,7 @@
     button{
       border:0;
       border-radius: 999px;
-      padding: 12px 16px;
+      padding: 12px 18px;
       font-size: 16px;
       cursor:pointer;
       user-select:none;
@@ -134,7 +118,7 @@
       transition: transform 140ms ease, filter 140ms ease, opacity 140ms ease, box-shadow 140ms ease;
       position: relative;
       will-change: transform;
-      min-width: 140px;
+      min-width: 150px;
       font-weight: 900;
     }
     button:active{ transform: scale(0.98); }
@@ -145,7 +129,6 @@
       box-shadow: 0 10px 24px rgba(255,77,136,0.28);
     }
 
-    /* NO button will detach and become fixed on the viewport */
     #noBtn{
       background:#fff;
       color: var(--pink2);
@@ -159,7 +142,6 @@
       min-height: 26px;
     }
 
-    /* YES “aggressive” wiggle */
     .wiggle{ animation: wiggle 260ms ease-in-out; }
     @keyframes wiggle{
       0%{ transform: scale(var(--ys)) rotate(0deg); }
@@ -168,11 +150,10 @@
       100%{ transform: scale(var(--ys)) rotate(0deg); }
     }
 
-    /* NO explode animation */
     .boom{ animation: boom 420ms ease-out forwards; }
     @keyframes boom{
-      35%{ transform: translate(0,0) scale(1.2) rotate(8deg); opacity: 1; }
-      100%{ transform: translate(0,0) scale(3.2) rotate(18deg); opacity: 0; filter: blur(2px); }
+      35%{ transform: scale(1.2) rotate(8deg); opacity: 1; }
+      100%{ transform: scale(3.2) rotate(18deg); opacity: 0; filter: blur(2px); }
     }
 
     /* Celebration overlay */
@@ -202,7 +183,7 @@
       }
     }
 
-    .heart{
+    .heartP{
       position:absolute;
       transform: translate(-50%, -50%);
       font-size: 18px;
@@ -218,17 +199,29 @@
       }
     }
 
-    /* Mobile: make buttons full width inside heart */
     @media (max-width: 420px){
       button{ width: 100%; min-width: 0; }
-      .inner{ width: 92%; }
     }
   </style>
 </head>
 
 <body>
   <div class="wrap">
-    <div class="heartCard" id="heartCard">
+    <div class="heartStage" id="heartStage">
+      <!-- REAL HEART SHAPE -->
+      <svg class="heartSvg" viewBox="0 0 900 650" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        <path
+          d="M450 610
+             C 120 430, 40 270, 140 150
+             C 220 60, 350 75, 450 190
+             C 550 75, 680 60, 760 150
+             C 860 270, 780 430, 450 610 Z"
+          fill="var(--cardFill)"
+          stroke="var(--cardBorder)"
+          stroke-width="4"
+        />
+      </svg>
+
       <div class="content">
         <div class="inner">
           <div class="badge">💌</div>
@@ -236,7 +229,7 @@
           <p>Quick question:</p>
           <div class="question">Will you be my Valentine?</div>
 
-          <div class="btnRow" id="btnRow">
+          <div class="btnRow">
             <button id="yesBtn" type="button">Yes</button>
             <button id="noBtn" type="button">No</button>
           </div>
@@ -260,7 +253,7 @@
     let noDetached = false;
 
     const noLines = [
-      "wow… no again?",
+       "wow… no again?",
       "GAY",
       "Translating... GLORY TO ISRAEL",
       "this is starting to get hurtful….",
@@ -272,7 +265,6 @@
       "alright. i'll remember that!"
     ];
 
-    // YES click: celebrate and lock
     yesBtn.addEventListener("click", () => {
       yesScale = Math.min(yesScale + 0.25, 2.8);
       applyYesEnergy(true);
@@ -286,7 +278,6 @@
       noBtn.style.cursor = "default";
     });
 
-    // NO click: now moves anywhere on SCREEN, never off-screen, shrinks each click, explodes at 10
     noBtn.addEventListener("click", () => {
       noClicks++;
 
@@ -295,16 +286,14 @@
         noDetached = true;
       }
 
-      const noScale = Math.max(0.35, 1 - noClicks * 0.05); // 10 clicks -> ~0.5
+      const noScale = Math.max(0.35, 1 - noClicks * 0.05);
       noBtn.style.transform = `scale(${noScale})`;
 
       msgBox.textContent = noLines[Math.min(noClicks - 1, noLines.length - 1)];
 
-      // YES gets bigger + more intense every NO click
       yesScale = Math.min(yesScale + 0.14, 2.6);
       applyYesEnergy();
 
-      // Move NO somewhere visible on the viewport
       moveNoOnScreen();
 
       if (noClicks >= 10){
@@ -335,19 +324,15 @@
     }
 
     function detachNoToViewport(){
-      // Convert NO into a viewport-floating button
       const rect = noBtn.getBoundingClientRect();
-
       noBtn.style.position = "fixed";
       noBtn.style.left = rect.left + "px";
       noBtn.style.top  = rect.top + "px";
-      noBtn.style.zIndex = "40";         // above heart
+      noBtn.style.zIndex = "40";
     }
 
     function moveNoOnScreen(){
-      const pad = 12; // safe padding from edges
-
-      // Force layout read after scaling so width/height are accurate
+      const pad = 12;
       const rect = noBtn.getBoundingClientRect();
       const bw = rect.width;
       const bh = rect.height;
@@ -355,7 +340,6 @@
       const vw = window.innerWidth;
       const vh = window.innerHeight;
 
-      // Choose a random visible spot
       const minX = pad;
       const maxX = Math.max(pad, vw - bw - pad);
       const minY = pad;
@@ -381,7 +365,6 @@
       }, 430);
     }
 
-    // Celebration fireworks
     function launchCelebration(){
       celebrate.classList.add("show");
 
@@ -428,7 +411,7 @@
 
         if (Math.random() < 0.40){
           const h = document.createElement("div");
-          h.className = "heart";
+          h.className = "heartP";
           h.textContent = emojis[(Math.random()*emojis.length)|0];
           h.style.left = x + "px";
           h.style.top  = y + "px";
@@ -445,7 +428,6 @@
       }
     }
 
-    // If screen rotates/resizes, keep NO button visible
     window.addEventListener("resize", () => {
       if (noDetached && noBtn.style.display !== "none") moveNoOnScreen();
     });
